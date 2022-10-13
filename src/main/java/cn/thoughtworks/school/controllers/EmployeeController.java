@@ -41,11 +41,9 @@ public class EmployeeController {
     //  /employees    #增加一个employee
     @PostMapping(value = "")
     public ResponseEntity<Map<String, String>> addEmployee(
-            @RequestParam("name") String name,
-            @RequestParam("age") Integer age,
-            @RequestParam("gender") String gender,
-            @RequestParam("companyId") Long companyId) throws Exception {
-        employeeService.addEmployee(name, age, gender, companyId);
+            @RequestBody Employee employee) throws Exception {
+//        employeeService.addEmployee(employee.getName(), employee.getAge(), employee.getGender(),employee.getCompanyId());
+        employeeService.addEmployee(employee);
 
         Map<String, String> body = new HashMap<>();
         return new ResponseEntity<>(body, HttpStatus.CREATED);
@@ -66,12 +64,11 @@ public class EmployeeController {
     @PutMapping(value = "/{id}")
     public ResponseEntity updateEmployee(@PathVariable Long id, @RequestBody Employee newEmployee) throws Exception {
         Employee employee = employeeService.getEmployeesById(id).get();
-        int updateAge = newEmployee.getAge();
-        String updateGender = newEmployee.getGender();
-        String updateName = newEmployee.getName();
-        Long updateCompany = newEmployee.getCompanyId();
-
-        employeeService.addEmployee(updateName,updateAge,updateGender,updateCompany);
+       employee.setAge(newEmployee.getAge());
+        employee.setGender(newEmployee.getGender());
+        employee.setName(newEmployee.getName());
+        employee.setCompanyId(newEmployee.getCompanyId());
+        employeeService.updateEmployee(employee);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

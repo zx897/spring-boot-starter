@@ -45,9 +45,9 @@ public class EmployeeService {
         return employeeRepository.findById(id);
     }
 
-    public void addEmployee( String name,Integer age,String gender,Long companyId) {
-        Employee employee = new Employee(name, age, gender, companyId);
-        employee = employeeRepository.save(employee);
+    public void addEmployee( Employee employee) {
+//        Employee employee = new Employee(name, age, gender, companyId);
+        employeeRepository.save(employee);
     }
 
     public ResponseEntity<?> deleteEmployee(Long id){
@@ -83,6 +83,10 @@ public class EmployeeService {
         return employeeRepository.findAll(pageable);
     };
 
+    public void updateEmployee( Employee employee) {
+//        Employee employee = new Employee(name, age, gender, companyId);
+        employeeRepository.save(employee);
+    }
 
 
 
