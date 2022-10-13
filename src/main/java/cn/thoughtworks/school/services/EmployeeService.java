@@ -32,7 +32,9 @@ public class EmployeeService {
         this.companyRepository = companyRepository;
     }
 
-    public ResponseEntity<List> findAllEmployees() {
+    //controller -> service -> repository
+    //              处理业务逻辑
+    public ResponseEntity<List<Employee>> findAllEmployees() {
         List<Employee> employeesList = employeeRepository.findAll();
         return new ResponseEntity<>(employeesList, HttpStatus.OK);
     }

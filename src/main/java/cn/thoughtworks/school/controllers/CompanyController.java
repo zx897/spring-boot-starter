@@ -4,6 +4,9 @@ package cn.thoughtworks.school.controllers;
 import cn.thoughtworks.school.entities.Company;
 import cn.thoughtworks.school.entities.Employee;
 import cn.thoughtworks.school.services.CompanyService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,15 +39,15 @@ public class CompanyController {
     }
 
 
-    @GetMapping("")
-    public ResponseEntity<List<Company>> getAllCompanies(){
-        List<Company> companies = companyService.findAllcompanys();
-        return new ResponseEntity<>(companies, HttpStatus.OK);
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<Company> getAllCompanies(){
+        return companyService.findAllcompanys();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Company> getCompanyById(@PathVariable("id") Long id){
-        Company company = companyService.getCompanyById(id).get();
+        Company company = companyService.getCompanyById(id);
         return new ResponseEntity<>(company, HttpStatus.OK);
     }
 
@@ -56,6 +59,7 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Optional<Company>> deleteCompany(@PathVariable("id") Long id) {
+
         if (companyService.getCompanyById(id).isPresent()) {
             companyService.deleteCompany(id);
             return new ResponseEntity<>(companyService.getCompanyById(id), HttpStatus.NO_CONTENT);
@@ -69,8 +73,8 @@ public class CompanyController {
 
         Optional<Company> company = companyService.getCompanyById(id);
         if (company.isPresent()) {
-            companyService.addCompany(company.get());
             company.get().setCompanyName(newCompany.getCompanyName());
+            companyService.addCompany(company.get());
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
