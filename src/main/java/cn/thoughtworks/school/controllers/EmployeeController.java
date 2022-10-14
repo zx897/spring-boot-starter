@@ -72,8 +72,8 @@ public class EmployeeController {
     }
 
     //      /employees/page/1/pageSize/5  #分页查询，page等于1，pageSize等于5
-    @GetMapping(value = "/page/{page}/pageSize/{pageSize}")
-    public ResponseEntity<Page<Employee>> getEmployeeByPage(@PathVariable int page, @PathVariable int pageSize) {
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<Page<Employee>> getEmployeeByPage(@RequestBody int page, @RequestBody int pageSize) {
         Pageable pageable = new PageRequest(page - 1, pageSize);
         Page<Employee> employees = employeeService.findAll(pageable);
         return new ResponseEntity<>(employees, HttpStatus.OK);
