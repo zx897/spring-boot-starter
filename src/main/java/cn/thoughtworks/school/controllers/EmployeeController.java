@@ -1,7 +1,6 @@
 package cn.thoughtworks.school.controllers;
 
 import cn.thoughtworks.school.entities.Employee;
-import cn.thoughtworks.school.repositories.EmployeeRepository;
 import cn.thoughtworks.school.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/employees")
@@ -28,65 +28,56 @@ public class EmployeeController {
 
     //  /employees    #获取employee列表
     @GetMapping(value = "")
-    public ResponseEntity<?> getAllEmployees() throws Exception {
-        return employeeService.findAllEmployees();
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employeesList = employeeService.findAllEmployees();
+        return new ResponseEntity<>(employeesList, HttpStatus.OK);
     }
 
     //  /employees/1  #获取某个具体employee
     @GetMapping(value = "/{id}")
-    public Employee getEmployeeById(@PathVariable("id") Long id) throws Exception {
-        return employeeService.getEmployeesById(id).get();
+    public Employee getEmployeeById(@PathVariable("id") Long id) {
+        Optional<Employee> optionalEmployeeById = employeeService.getEmployeesById(id);
+        return optionalEmployeeById.orElse(null);
     }
 
     //  /employees    #增加一个employee
     @PostMapping(value = "")
-    public ResponseEntity<Map<String, String>> addEmployee(
-            @RequestBody Employee employee) throws Exception {
-//        employeeService.addEmployee(employee.getName(), employee.getAge(), employee.getGender(),employee.getCompanyId());
+    public ResponseEntity<Map<String, String>> addEmployee(@RequestBody Employee employee) {
         employeeService.addEmployee(employee);
-
         Map<String, String> body = new HashMap<>();
         return new ResponseEntity<>(body, HttpStatus.CREATED);
     }
 
     //   /employees/1  #删除某个employee
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<?> deleteEmployee(@PathVariable("id") Long id) throws Exception {
-        if (employeeService.getEmployeesById(id) != null) {
-            employeeService.deleteEmployee(id);
-            return new ResponseEntity<>(employeeService.getEmployeesById(id), HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Employee> deleteEmployeeById(@PathVariable("id") Long id) {
+        Optional<Employee> optionalDeletedEmployee = employeeService.deleteEmployee(id);
+        return optionalDeletedEmployee.map(employee -> new ResponseEntity<>(employee, HttpStatus.NO_CONTENT)).orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     }
 
     //  /employees/1  #更新某个employee
     @PutMapping(value = "/{id}")
-    public ResponseEntity updateEmployee(@PathVariable Long id, @RequestBody Employee newEmployee) throws Exception {
-        Employee employee = employeeService.getEmployeesById(id).get();
-       employee.setAge(newEmployee.getAge());
-        employee.setGender(newEmployee.getGender());
-        employee.setName(newEmployee.getName());
-        employee.setCompanyId(newEmployee.getCompanyId());
-        employeeService.updateEmployee(employee);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee newEmployee) {
+        Employee updetedEmployee = employeeService.updateEmployee(id, newEmployee);
+        if(updetedEmployee != null){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);}
+        else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     //  /employees/male   #筛选出所有男性Employee
     @GetMapping(value = "/male")
-    public ResponseEntity getEmployeeByGender() throws Exception {
-        List<Employee> employeeList = employeeService.getEmployeeByGender("male").get();
+    public ResponseEntity<List<Employee>> getEmployeeByGender() {
+        List<Employee> employeeList = employeeService.getEmployeeByGender("male");
         return new ResponseEntity<>(employeeList, HttpStatus.OK);
     }
 
-//      /employees/page/1/pageSize/5  #分页查询，page等于1，pageSize等于5
+    //      /employees/page/1/pageSize/5  #分页查询，page等于1，pageSize等于5
     @GetMapping(value = "/page/{page}/pageSize/{pageSize}")
-    public ResponseEntity getEmployeeByPage(@PathVariable int page, @PathVariable int pageSize) throws Exception {
-        Pageable pageable = new PageRequest(page-1, pageSize);
-        Page employees = employeeService.findAll(pageable);
+    public ResponseEntity<Page<Employee>> getEmployeeByPage(@PathVariable int page, @PathVariable int pageSize) {
+        Pageable pageable = new PageRequest(page - 1, pageSize);
+        Page<Employee> employees = employeeService.findAll(pageable);
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
-
 
 
 }

@@ -30,23 +30,27 @@ public class CompanyService {
     public Optional<Company> getCompanyById(Long id){
         return companyRepository.findById(id);
     }
-    public void addCompany(Company company){
+    public Optional<Company> addCompany(Company company){
         companyRepository.save(company);
+        return Optional.empty();
     }
 
-    public void deleteCompany(Long id){
-        if (companyRepository.existsById(id))
+    public Optional<Company> deleteCompany(Long id){
+        if (companyRepository.existsById(id)){
             companyRepository.deleteById(id);
-
+            return companyRepository.findById(id);
+        }
+        return Optional.empty();
     }
 
-    public Object updateCompany(Long id,Company newCompany){
-        if(companyRepository.findById(id).isPresent()){
-            Company company = companyRepository.findById(id).get();
+    public Optional<Company> updateCompanyById(Long id,Company newCompany){
+        Optional<Company> optionalCompany = companyRepository.findById(id);
+        if (optionalCompany.isPresent()) {
+            Company company = optionalCompany.get();
             company.setCompanyName(newCompany.getCompanyName());
             companyRepository.save(company);
         }
-        return null;
+        return Optional.empty();
     }
 
     public Set<Employee> getEmployeeByCompanyId( Long id){
@@ -59,6 +63,5 @@ public class CompanyService {
 
     public Page<Company> findAll(Pageable pageable){
         return companyRepository.findAll(pageable);
-    };
-
+    }
 }

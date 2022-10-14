@@ -27,67 +27,60 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-    @GetMapping("api/examples/{id}")
-    public ResponseEntity<Company> findOne(@PathVariable Long id) {
-        if(companyService.getCompanyById(id).isPresent()){
-            return ResponseEntity.ok(companyService.getCompanyById(id).get());
-        }
-        return null;
-    }
-
-
-    @GetMapping("")
-    public ResponseEntity<List<Company>> getAllCompanies(){
+    @GetMapping
+    public ResponseEntity<List<Company>> getAllCompanies() {
         List<Company> companies = companyService.findAllcompanys();
         return new ResponseEntity<>(companies, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Company> getCompanyById(@PathVariable("id") Long id){
-        Company company = companyService.getCompanyById(id).get();
-        return new ResponseEntity<>(company, HttpStatus.OK);
+    public ResponseEntity<Company> getCompanyById(@PathVariable("id") Long id) {
+        Optional<Company> companyById = companyService.getCompanyById(id);
+        return companyById.map(ResponseEntity::ok).orElse(null);
     }
 
-    @PostMapping("")
-    public ResponseEntity addCompany(@RequestBody Company company){
-        companyService.addCompany(company);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<Company> addCompany(@RequestBody Company company) {
+        Optional<Company> addCompany = companyService.addCompany(company);
+        if (!addCompany.isPresent()) {
+            return null;
+        } else {
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Optional<Company>> deleteCompany(@PathVariable("id") Long id) {
-        if (companyService.getCompanyById(id).isPresent()) {
-            companyService.deleteCompany(id);
-            return new ResponseEntity<>(companyService.getCompanyById(id), HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Company> deleteCompany(@PathVariable("id") Long id) {
+        Optional<Company> optionalCompany = companyService.deleteCompany(id);
+        if (optionalCompany.isPresent())
+            return null;
+         else {
+             return new ResponseEntity<>(HttpStatus.NOT_FOUND);}
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateCompany(@PathVariable("id") Long id, @RequestBody Company newCompany) {
+    public ResponseEntity<Company> updateCompanyById(@PathVariable("id") Long id, @RequestBody Company newCompany) {
 
-        Optional<Company> company = companyService.getCompanyById(id);
-        if (company.isPresent()) {
-            companyService.addCompany(company.get());
-            company.get().setCompanyName(newCompany.getCompanyName());
+        Optional<Company> optionalCompany = companyService.updateCompanyById(id, newCompany);
+        if(optionalCompany.isPresent()){
+            return null;
         }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>( HttpStatus.NO_CONTENT);
 
     }
 
     @GetMapping(value = "/{id}/employees")
-    public ResponseEntity<Set<Employee>> getEmployeeByCompanyId(@PathVariable Long id){
-        if (companyService.getCompanyById(id).isPresent()) {
-            Company company = companyService.getCompanyById(id).get();
-            Set<Employee> employees = company.getEmployees();
-            return new ResponseEntity<>(employees, HttpStatus.OK);
+    public ResponseEntity<Set<Employee>> getEmployeeByCompanyId(@PathVariable Long id) {
+        Set<Employee> employeesList = companyService.getEmployeeByCompanyId(id);
+        if (employeesList != null) {
+        return  new ResponseEntity<>(employeesList, HttpStatus.OK);
         }
-        return new ResponseEntity(null, HttpStatus.OK);
+        return null;
     }
 
-    @GetMapping(value = "/page/{page}/pageSize/{pageSize}")
-    public ResponseEntity<Page<Company>> getCompanyPage(@PathVariable int page, @PathVariable int pageSize){
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<Page<Company>> getCompanyPage(@RequestBody int page, @RequestBody int pageSize) {
         Pageable pageable = new PageRequest(page - 1, pageSize);
         Page<Company> companies = companyService.findAll(pageable);
         return new ResponseEntity<>(companies, HttpStatus.OK);
