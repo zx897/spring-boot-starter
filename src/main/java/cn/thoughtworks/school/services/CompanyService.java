@@ -5,6 +5,9 @@ import cn.thoughtworks.school.entities.Company;
 import cn.thoughtworks.school.entities.Employee;
 import cn.thoughtworks.school.repositories.CompanyRepository;
 import java.util.Collections;
+
+import cn.thoughtworks.school.repositories.EmployeeRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,50 +18,43 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@AllArgsConstructor
 public class CompanyService {
     @Autowired
     final CompanyRepository companyRepository;
-
-    public CompanyService(CompanyRepository companyRepository) {
-        this.companyRepository = companyRepository;
-    }
+    final EmployeeRepository employeeRepository;
 
     public List<Company> findAllcompanys() {
         return companyRepository.findAll();
     }
 
-    public Optional<Company> getCompanyById(Long id){
-        return companyRepository.findById(id);
+    public Company getCompanyById(Long id){
+        Optional<Company> companyById = companyRepository.findById(id);
+        return companyById.orElse(null);
     }
-    public Optional<Company> addCompany(Company company){
-        companyRepository.save(company);
-        return Optional.empty();
+    public Company addCompany(Company company){
+        return companyRepository.save(company);
     }
 
-    public Optional<Company> deleteCompany(Long id){
+    public void deleteCompany(Long id){
         if (companyRepository.existsById(id)){
             companyRepository.deleteById(id);
-            return companyRepository.findById(id);
         }
-        return Optional.empty();
     }
 
-    public Optional<Company> updateCompanyById(Long id,Company newCompany){
+    public Company updateCompanyById(Long id,Company newCompany){
         Optional<Company> optionalCompany = companyRepository.findById(id);
         if (optionalCompany.isPresent()) {
             Company company = optionalCompany.get();
             company.setCompanyName(newCompany.getCompanyName());
             companyRepository.save(company);
+            return company;
         }
-        return Optional.empty();
+        return null;
     }
 
-    public Set<Employee> getEmployeeByCompanyId( Long id){
-        if(companyRepository.findById(id).isPresent()){
-            Company company = companyRepository.findById(id).get();
-            return  company.getEmployees();
-        }
-        return Collections.emptySet();
+    public List<Employee> getEmployeeByCompanyId( Long companyId){
+        return  employeeRepository.findAllByCompanyId(companyId);
     }
 
     public Page<Company> findAll(Pageable pageable){
