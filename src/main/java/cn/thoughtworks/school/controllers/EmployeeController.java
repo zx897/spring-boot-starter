@@ -59,7 +59,7 @@ public class EmployeeController {
     }
 
     //          /employees/page/1/pageSize/5  #分页查询，page等于1，pageSize等于5
-    @GetMapping
+    @GetMapping("/page")
     @ResponseStatus(HttpStatus.OK)
     public Page<Employee> getEmployeeByPage(@RequestParam int page, @RequestParam int pageSize) {
         Pageable pageable = new PageRequest(page - 1, pageSize);

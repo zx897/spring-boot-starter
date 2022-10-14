@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/companies")
@@ -53,14 +52,14 @@ public class CompanyController {
     }
 
     @GetMapping(value = "/{id}/employees")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public List<Employee> getEmployeeByCompanyId(@PathVariable Long id) {
         return companyService.getEmployeeByCompanyId(id);
     }
 
-    @GetMapping
+    @GetMapping("/page")
     @ResponseStatus(HttpStatus.OK)
-    public Page<Company> getCompanyPage(@RequestBody int page, @RequestBody int pageSize) {
+    public Page<Company> getCompanyPage(@RequestParam int page, @RequestParam int pageSize) {
         Pageable pageable = new PageRequest(page - 1, pageSize);
         return companyService.findAll(pageable);
     }
